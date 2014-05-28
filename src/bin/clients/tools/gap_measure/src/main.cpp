@@ -39,11 +39,19 @@ int main(int argc, char *argv[]) {
 
 		int64_t nv = stinger_mapping_nv(S);
 
+		printf("Batch");
 		for (int64_t i = 0; i < nv; i++) {
-			STINGER_FORALL_EDGES_OF_VTX_BEGIN (S, i) {
-				LOG_I_A("Edge: %ld,%ld",STINGER_EDGE_SOURCE,STINGER_EDGE_DEST);
-			} STINGER_FORALL_EDGES_OF_VTX_END();
+			int64_t last_vtx = i;
+			int64_t gap = 0;
+			if (stinger_outdegree_get(S,i) > 1) {
+				STINGER_FORALL_EDGES_OF_TYPE_OF_VTX_BEGIN (S, 1, i) {
+					gap = last_vtx - STINGER_EDGE_DEST;
+					last_vtx = STINGER_EDGE_DEST;
+					printf("%ld,",gap);
+				} STINGER_FORALL_EDGES_OF_TYPE_OF_VTX_END();
+			}
 		}
+		printf("\n");
 
 
 		mon.release_alg_read_lock();
