@@ -39,11 +39,18 @@ int main(int argc, char *argv[]) {
 
 		int64_t nv = stinger_mapping_nv(S);
 
+		for (int64_t i = 0; i < nv; i++) {
+			STINGER_FORALL_EDGES_OF_VTX_BEGIN (S, i) {
+				LOG_I_A("Edge: %ld,%ld",STINGER_EDGE_SOURCE,STINGER_EDGE_DEST);
+			} STINGER_FORALL_EDGES_OF_VTX_END();
+		}
+
+
 		mon.release_alg_read_lock();
 
 		double time = toc();
 		LOG_I_A ("elapsed: %20.15e sec", time);
-		LOG_I_A ("nv: %ld", nv);
+		LOG_I_A ("nv: %ld, %ld", nv);
 		LOG_I_A ("rate: %20.15e vtx/sec", (double) nv / time);
 	}
 
