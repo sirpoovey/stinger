@@ -81,14 +81,31 @@ main(int argc, char *argv[])
     std::cout << "Enter the destination vertex: ";
     std::getline (std::cin, dest);
 
+
+
     time = get_current_timestamp();
 
-    EdgeInsertion * insertion = batch.add_insertions();
-    insertion->set_source_str(src);
-    insertion->set_destination_str(dest);
-    insertion->set_weight(1);
-    insertion->set_time(time);
-
+    if (src[0] == '-') {
+      std::string del;
+      std::cout << "Type X to delete otherwise will decrement the weight: ";
+      std::getline (std::cin, del);
+      std::string src2 = src.substr(1);
+      EdgeDeletion * deletion = batch.add_deletions();
+      deletion->set_source_str(src2);
+      deletion->set_destination_str(dest);
+      if (del.compare("X") == 0) {
+        deletion->set_weight(0);
+      } else {
+        deletion->set_weight(1);
+      }
+      LOG_I("DELETION");
+    } else {
+      EdgeInsertion * insertion = batch.add_insertions();
+      insertion->set_source_str(src);
+      insertion->set_destination_str(dest);
+      insertion->set_weight(1);
+      insertion->set_time(time);
+    }
     LOG_I_A ("%ld: <%s, %s> at time %ld", batch_num, src.c_str(), dest.c_str(), time);
     LOG_D ("Sending message");
     send_message(sock_handle, batch);

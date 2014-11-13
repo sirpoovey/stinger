@@ -81,6 +81,16 @@ int stinger_remove_edge (struct stinger *, int64_t /* type */ ,
 int stinger_remove_edge_pair (struct stinger *, int64_t /* type */ ,
 			      int64_t /* from */ , int64_t /* to */ );
 
+int stinger_decr_edge (struct stinger *, int64_t /* type */ ,
+       int64_t /* from */ , int64_t /* to */,
+       int64_t /* int weight */ ,
+       int64_t /* timestamp */);
+
+int stinger_decr_edge_pair (struct stinger *, int64_t /* type */ ,
+    int64_t /* from */ , int64_t /* to */,
+    int64_t /* int weight */ ,
+    int64_t /* timestamp */);
+
 void stinger_remove_all_edges_of_type (struct stinger *G, int64_t type);
 
 /* Edge metadata (directed)*/

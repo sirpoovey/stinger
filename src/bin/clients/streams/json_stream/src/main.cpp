@@ -20,43 +20,48 @@ main(int argc, char *argv[])
   /* global options */
   int port = 10102;
   int batch_size = 1000;
+  int max_batches = 0;
   double timeout = 0;
   struct hostent * server = NULL;
   char * filename = NULL;
   int use_directed = 0;
 
   int opt = 0;
-  while(-1 != (opt = getopt(argc, argv, "p:a:x:t:d"))) {
+  while(-1 != (opt = getopt(argc, argv, "p:a:x:t:r:d"))) {
     switch(opt) {
-      case 'p': {
-		  port = atoi(optarg);
-		} break;
+    case 'p': {
+      port = atoi(optarg);
+    } break;
 
-      case 'x': {
-		  batch_size = atol(optarg);
-		  LOG_I_A("Batch size changed to %d", batch_size);
-		} break;
+    case 'x': {
+      batch_size = atol(optarg);
+      LOG_I_A("Batch size changed to %d", batch_size);
+    } break;
 
-      case 'a': {
-		  server = gethostbyname(optarg);
-		  if(NULL == server) {
-		    LOG_E_A("ERROR: server %s could not be resolved.", optarg);
-		    exit(-1);
-		  }
-		} break;
-      case 'd': {
-		  use_directed = 1;
-		} break;
-      case 't': {
-	timeout = atof(optarg);
-      } break;
+    case 'a': {
+      server = gethostbyname(optarg);
+      if(NULL == server) {
+        LOG_E_A("ERROR: server %s could not be resolved.", optarg);
+        exit(-1);
+      }
+    } break;
+    case 'd': {
+      use_directed = 1;
+    } break;
+    case 'r': {
+      max_batches = atol(optarg);
+      LOG_I_A("Maximum Batches before rollof changed to %d", max_batches);
+    } break;
+    case 't': {
+      timeout = atof(optarg);
+    } break;
 
-      case '?':
-      case 'h': {
-		  printf("Usage:    %s [-p port] [-a server_addr] [-t timeout] [-x batch_size] filename\n", argv[0]);
-		  printf("Defaults:\n\tport: %d\n\tserver: localhost\n\ttimeout:%lf\n\tbatch_size: %d", port, timeout, batch_size);
-		  exit(0);
-		} break;
+    case '?':
+    case 'h': {
+      printf("Usage:    %s [-p port] [-a server_addr] [-t timeout] [-x batch_size] filename\n", argv[0]);
+      printf("Defaults:\n\tport: %d\n\tserver: localhost\n\ttimeout:%lf\n\tbatch_size: %d", port, timeout, batch_size);
+      exit(0);
+    } break;
     }
   }
 
@@ -113,7 +118,7 @@ main(int argc, char *argv[])
     document.Parse<0>(line);
     if(document.IsObject()) {
       if(edge_finder.apply(batch, document, batch.metadata_size())) {
-	batch.add_metadata(line);
+        batch.add_metadata(line);
       }
     }
     timesince += toc();
@@ -124,9 +129,9 @@ main(int argc, char *argv[])
       timesince = 0;
       batch.Clear();
       if(use_directed) {
-	batch.set_make_undirected(false);
+        batch.set_make_undirected(false);
       } else {
-	batch.set_make_undirected(true);
+        batch.set_make_undirected(true);
       }
       batch.set_type(MIXED);
       batch.set_keep_alive(true);
