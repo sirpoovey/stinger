@@ -14,6 +14,22 @@
 
 using namespace gt::stinger;
 
+void change_insertions_to_deletions(StingerBatch * batch_p) {
+  for (int i = 0; i < batch_p->insertions_size(); i++) {
+    EdgeDeletion * d = batch_p->add_deletions();
+    EdgeInsertion in = batch_p->insertions(i);
+    d->set_type(in.type());
+    d->set_type_str(in.type_str());
+    d->set_source(in.source());
+    d->set_source_str(in.source_str());
+    d->set_destination(in.destination());
+    d->set_destination_str(in.destination_str());
+    d->set_weight(in.weight());
+  }
+
+  batch_p->clear_insertions();
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -25,6 +41,7 @@ main(int argc, char *argv[])
   struct hostent * server = NULL;
   char * filename = NULL;
   int use_directed = 0;
+  int make_deletions = 1;
 
   int opt = 0;
   while(-1 != (opt = getopt(argc, argv, "p:a:x:t:r:d"))) {
@@ -47,6 +64,9 @@ main(int argc, char *argv[])
     } break;
     case 'd': {
       use_directed = 1;
+    } break;
+    case 'D': {
+      make_deletions = 1;
     } break;
     case 'r': {
       max_batches = atol(optarg);
@@ -125,6 +145,9 @@ main(int argc, char *argv[])
     int64_t total_actions = batch.insertions_size() + batch.deletions_size();
     if(total_actions >= batch_size || (timeout > 0 && timesince >= timeout)) {
       LOG_I_A("Sending a batch of %ld actions", total_actions);
+      if (make_deletions == 1) {
+        change_insertions_to_deletions(&batch);
+      }
       send_message(sock_handle, batch);
       timesince = 0;
       batch.Clear();
