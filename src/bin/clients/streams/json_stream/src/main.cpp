@@ -105,6 +105,7 @@ main(int argc, char *argv[])
 
   /* start the connection */
   int sock_handle = connect_to_batch_server (server, port);
+  if (sock_handle == -1) exit(-1);
 
 
   EdgeCollectionSet edge_finder;

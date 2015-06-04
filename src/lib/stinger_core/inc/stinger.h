@@ -51,7 +51,7 @@ int stinger_save_to_file (struct stinger * /* STINGER */,
 			  const char * /* directory name */);
 
 int stinger_open_from_file (const char * /* directory */, 
-			    struct stinger ** /* reference for empty output pointer */, 
+			    struct stinger * /* reference for empty STINGER */, 
 			    uint64_t * /* reference for output max vtx */);
 
 /* Edge insertion and deletion */
@@ -321,19 +321,19 @@ stinger_etype_array_size(int64_t nebs);
 #define STINGER_FORALL_EDGES_OF_VTX_END() } while (0)
 
 #define STINGER_FORALL_EDGES_OF_TYPE_OF_VTX_BEGIN(STINGER_,TYPE_,VTX_) do {
-#define STINGER_FORALL_EDGES_OF_TYPE_OF_VTX_END() while (0)
+#define STINGER_FORALL_EDGES_OF_TYPE_OF_VTX_END() } while (0)
 
 #define STINGER_PARALLEL_FORALL_EDGES_OF_VTX_BEGIN(STINGER_,VTX_) do {
-#define STINGER_PARALLEL_FORALL_EDGES_OF_VTX_END() while (0)
+#define STINGER_PARALLEL_FORALL_EDGES_OF_VTX_END() } while (0)
 
 #define STINGER_PARALLEL_FORALL_EDGES_OF_TYPE_OF_VTX_BEGIN(STINGER_,TYPE_,VTX_) do {
-#define STINGER_PARALLEL_FORALL_EDGES_OF_TYPE_OF_VTX_END() while (0)
+#define STINGER_PARALLEL_FORALL_EDGES_OF_TYPE_OF_VTX_END() } while (0)
 
 #define STINGER_FORALL_EDGES_BEGIN(STINGER_,TYPE_) do {
-#define STINGER_FORALL_EDGES_END() while (0)
+#define STINGER_FORALL_EDGES_END() } while (0)
 
 #define STINGER_PARALLEL_FORALL_EDGES_BEGIN(STINGER_,TYPE_) do {
-#define STINGER_PARALLEL_FORALL_EDGES_END() while (0)
+#define STINGER_PARALLEL_FORALL_EDGES_END() } while (0)
 
 /* read-only traversal macros *
  * These should be safe even when the graph is being modified elsewhere. All 
@@ -343,19 +343,19 @@ stinger_etype_array_size(int64_t nebs);
 #define STINGER_READ_ONLY_FORALL_EDGES_OF_VTX_END() } while (0)
 
 #define STINGER_READ_ONLY_FORALL_EDGES_OF_TYPE_OF_VTX_BEGIN(STINGER_,TYPE_,VTX_) do {
-#define STINGER_READ_ONLY_FORALL_EDGES_OF_TYPE_OF_VTX_END() while (0)
+#define STINGER_READ_ONLY_FORALL_EDGES_OF_TYPE_OF_VTX_END() } while (0)
 
 #define STINGER_READ_ONLY_PARALLEL_FORALL_EDGES_OF_VTX_BEGIN(STINGER_,VTX_) do {
-#define STINGER_READ_ONLY_PARALLEL_FORALL_EDGES_OF_VTX_END() while (0)
+#define STINGER_READ_ONLY_PARALLEL_FORALL_EDGES_OF_VTX_END() } while (0)
 
 #define STINGER_READ_ONLY_PARALLEL_FORALL_EDGES_OF_TYPE_OF_VTX_BEGIN(STINGER_,TYPE_,VTX_) do {
-#define STINGER_READ_ONLY_PARALLEL__FORALL_EDGES_OF_TYPE_OF_VTX_END() while (0)
+#define STINGER_READ_ONLY_PARALLEL__FORALL_EDGES_OF_TYPE_OF_VTX_END() } while (0)
 
 #define STINGER_READ_ONLY_FORALL_EDGES_BEGIN(STINGER_,TYPE_) do {
-#define STINGER_READ_ONLY_FORALL_EDGES_END() while (0)
+#define STINGER_READ_ONLY_FORALL_EDGES_END() } while (0)
 
 #define STINGER_READ_ONLY_PARALLEL_FORALL_EDGES_BEGIN(STINGER_,TYPE_) do {
-#define STINGER_READ_ONLY_PARALLEL_FORALL_EDGES_END() while (0)
+#define STINGER_READ_ONLY_PARALLEL_FORALL_EDGES_END() } while (0)
 
 /* Use these to access the current edge inside the above macros */
 #define STINGER_EDGE_SOURCE /* always read-only */
