@@ -3,18 +3,22 @@
 #include <limits>
 #include <unistd.h>
 
+#include "server.h"
 #include "stinger_net/stinger_server_state.h"
-
-extern "C" {
 #include "stinger_core/stinger.h"
-#include "stinger_core/stinger_error.h"
 #include "stinger_core/stinger_atomics.h"
 #include "stinger_core/xmalloc.h"
-}
+
+#undef LOG_AT_F
+#undef LOG_AT_E
+#undef LOG_AT_W
+#undef LOG_AT_I
+#undef LOG_AT_V
+#undef LOG_AT_D
+#define LOG_AT_I
+#include "stinger_core/stinger_error.h"
 
 using namespace gt::stinger;
-
-#include "server.h"
 
 template<int64_t type>
 inline void

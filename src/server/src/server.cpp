@@ -12,8 +12,6 @@
 
 #include "server.h"
 #include "stinger_net/stinger_server_state.h"
-
-extern "C" {
 #include "stinger_core/stinger.h"
 #include "stinger_core/stinger_shared.h"
 #include "stinger_core/xmalloc.h"
@@ -23,9 +21,14 @@ extern "C" {
 #include "stinger_utils/metisish_support.h"
 #include "stinger_utils/json_support.h"
 #include "stinger_utils/csv.h"
-}
 
-//#define LOG_AT_D
+#undef LOG_AT_F
+#undef LOG_AT_E
+#undef LOG_AT_W
+#undef LOG_AT_I
+#undef LOG_AT_V
+#undef LOG_AT_D
+#define LOG_AT_I
 #include "stinger_core/stinger_error.h"
 
 using namespace gt::stinger;
@@ -41,6 +44,7 @@ static int start_pipe[2] = {-1, -1};
 
 /* we need a socket that can reply with the shmem name & size of the graph */
 pid_t master_pid;
+size_t save_counter = 0;
 static pthread_t name_pid, batch_pid;
 
 static StingerServerState & server_state = StingerServerState::get_server_state();
@@ -48,6 +52,7 @@ static StingerServerState & server_state = StingerServerState::get_server_state(
 static void cleanup (void);
 extern "C" {
   static void sigterm_cleanup (int);
+  static void sigUSR1_save (int);
 }
   
 int main(int argc, char *argv[])
@@ -406,6 +411,13 @@ int main(int argc, char *argv[])
     sigaction (SIGINT, &sa, NULL);
     sigaction (SIGTERM, &sa, NULL);
     sigaction (SIGHUP, &sa, NULL);
+
+    /* Register a handler to save on demand */
+    struct sigaction sb;
+    sb.sa_flags = 0;
+    sigemptyset (&sb.sa_mask);
+    sb.sa_handler = sigUSR1_save;
+    sigaction (SIGUSR1, &sb, NULL);
   }
 
   if(unleash_daemon) {
@@ -476,4 +488,14 @@ sigterm_cleanup (int)
 {
   cleanup ();
   exit (EXIT_SUCCESS);
+}
+
+void
+sigUSR1_save (int)
+{
+  struct stinger * S = server_state.get_stinger();
+  char output_file[256];
+  snprintf (output_file, 255, "stinger_snapshot_%ld_seq_%ld.bin", master_pid, save_counter++);
+  stinger_save_to_file (S, stinger_max_active_vertex(S) + 1, output_file);
+  LOG_D_A ("Saved stinger snapshot to disk as %s...", output_file);
 }

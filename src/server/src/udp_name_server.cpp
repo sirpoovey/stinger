@@ -10,7 +10,13 @@
 #include "server.h"
 #include "stinger_net/stinger_server_state.h"
 
-//#define LOG_AT_D
+#undef LOG_AT_F
+#undef LOG_AT_E
+#undef LOG_AT_W
+#undef LOG_AT_I
+#undef LOG_AT_V
+#undef LOG_AT_D
+#define LOG_AT_I
 #include "stinger_core/stinger_error.h"
 
 void error(const char *msg)

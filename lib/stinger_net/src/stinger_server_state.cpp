@@ -66,7 +66,6 @@ StingerServerState::~StingerServerState()
 StingerServerState &
 StingerServerState::get_server_state()
 {
-  LOG_D("called");
   static StingerServerState self;
   return self;
 }

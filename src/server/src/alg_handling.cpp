@@ -1,3 +1,12 @@
+#include <cstdio>
+#include <limits>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/un.h>
+#include <unistd.h>
+
+#include "server.h"
 #include "stinger_core/stinger.h"
 #include "stinger_core/stinger_shared.h"
 #include "stinger_utils/timer.h"
@@ -9,25 +18,22 @@
 #include "stinger_net/proto/stinger-alg.pb.h"
 #include "stinger_net/send_rcv.h"
 #include "stinger_net/stinger_server_state.h"
-#include "server.h"
 
 #if !defined(MTA)
 #define MTA(x)
 #endif
-
-#include <cstdio>
-#include <limits>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <sys/un.h>
-#include <unistd.h>
 
 /* POSIX only for now, note that mongoose would be a good place to 
 get cross-platform threading and sockets code */
 #include <pthread.h> 
 
 /* Must be included last */
+#undef LOG_AT_F
+#undef LOG_AT_E
+#undef LOG_AT_W
+#undef LOG_AT_I
+#undef LOG_AT_V
+#undef LOG_AT_D
 #define LOG_AT_I
 #include "stinger_core/stinger_error.h"
 
