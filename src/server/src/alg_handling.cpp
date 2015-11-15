@@ -308,6 +308,8 @@ process_loop_handler(void * data)
     StingerBatch * batch = server_state.dequeue_batch();
 
     batch_time = timer();
+
+/* BEGIN INITIALIZATION */
     /* loop through each algorithm, blocking init as needed, send start preprocessing message */
     size_t stop_alg_level = server_state.get_num_levels();
     for(size_t cur_level_index = 0; cur_level_index < stop_alg_level; cur_level_index++) {
@@ -403,7 +405,9 @@ process_loop_handler(void * data)
         }
       }
     }
+/* END INITIALIZATION */
 
+/* BEGIN PRE-PROCESSING */
     stop_alg_level = server_state.get_num_levels();
     for(size_t cur_level_index = 0; cur_level_index < stop_alg_level; cur_level_index++) {
       size_t stop_alg_index = server_state.get_num_algs(cur_level_index);
@@ -498,6 +502,7 @@ process_loop_handler(void * data)
         }
       }
     }
+/* END PRE-PROCESSING */
 
     /* update stinger */
     update_time = timer();
@@ -515,6 +520,20 @@ process_loop_handler(void * data)
     S->update_time = update_time;
     S->queue_size = server_state.get_queue_size();
 
+/* SAVE TO DISK IF IT IS TIME */
+    extern size_t save_on_next_round;
+    extern pid_t master_pid;
+    extern size_t save_counter;
+    if (save_on_next_round) {
+      char output_file[256];
+      snprintf (output_file, 255, "stinger_snapshot_%ld_seq_%ld.bin", master_pid, save_counter++);
+      stinger_save_to_file (S, stinger_max_active_vertex(S) + 1, output_file);
+      LOG_D_A ("Saved stinger snapshot to disk as %s...", output_file);
+      save_on_next_round = false;
+    }
+/* DONE SAVE TO DISK */
+
+/* BEGIN POST-PROCESSING */
     /* loop through each algorithm, send start postprocessing message */
     stop_alg_level = server_state.get_num_levels();
     for(size_t cur_level_index = 0; cur_level_index < stop_alg_level; cur_level_index++) {
@@ -610,7 +629,9 @@ process_loop_handler(void * data)
         }
       }
     }
+/* END POST-PROCESSING */
 
+/* BEGIN MONITORS */
     /* Look through each monitor and send an update message (using a copy of the cached message for dependencies) */
     size_t stop_mon_index = server_state.get_num_mons();
     {
@@ -707,6 +728,7 @@ process_loop_handler(void * data)
       }
     }
     server_state.write_data();
+/* END MONITORS */
 
     delete batch;
     
