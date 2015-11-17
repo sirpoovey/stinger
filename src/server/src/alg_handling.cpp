@@ -528,7 +528,18 @@ process_loop_handler(void * data)
       char output_file[256];
       snprintf (output_file, 255, "stinger_snapshot_%ld_seq_%ld.bin", master_pid, save_counter++);
       stinger_save_to_file (S, stinger_max_active_vertex(S) + 1, output_file);
-      LOG_D_A ("Saved stinger snapshot to disk as %s...", output_file);
+      LOG_E_A ("Saved stinger snapshot to disk as %s...", output_file);
+      snprintf (output_file, 255, "stinger_events_%ld_seq_%ld.bin", master_pid, save_counter-1);
+      FILE * fp = fopen(output_file, "w");
+
+      if(!fp) {
+        LOG_E_A("Could not save stinger event ocounts %s...", output_file);
+      } else {
+        fprintf(fp,"%ld",S->num_insertions);
+      }
+
+      fclose(fp);
+
       save_on_next_round = false;
     }
 /* DONE SAVE TO DISK */
