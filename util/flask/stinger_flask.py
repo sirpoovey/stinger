@@ -123,6 +123,75 @@ class Insert(Resource):
         r = json.dumps({"status": "success", "time": exec_time, "current_batch_size": current_batch_size})
         return Response(response=r,status=201,mimetype="application/json")
 
+@api.route('/delete',endpoint='delete')
+class Insert(Resource):
+    edge = api.model('Edge', {
+        'src': fields.String(required=True, description='Source vertex'),
+        'dest': fields.String(required=True, description='Destination vertex'),
+        'type': fields.String(required=False, description='Edge type')
+    })
+    edgesSpec = api.model('Delete', {
+        'edges': fields.List(fields.Nested(edge), description='List of edges', required=True),
+        'immediate': fields.Boolean(description='Instructs the API to send this batch to STINGER immediately upon receipt', required=False, default=False),
+        'strings': fields.Boolean(description='Instructs the API to interpret integer vertex names as strings rather than integer vertex IDs', required=False, default=True)
+    })
+    @api.expect(edgesSpec)
+    @api.doc(responses={
+        201: 'Edge Inserted',
+        400: 'Bad Request',
+        503: 'Unable to reach STINGER'
+    })
+    def post(self):
+        setupSTINGERConnection()
+        exec_time = time.time()
+        if not request.json:
+            r = json.dumps({"error": "Invalid input"})
+            return Response(response=r,status=400,mimetype="application/json")
+
+        # grab the lock
+        counter_lock.acquire()
+
+        try:
+            data = request.json
+            send_immediate = False if 'immediate' not in data else data['immediate']
+            only_strings = True if 'strings' not in data else data['strings']
+
+            if isinstance(data["edges"], list):
+                edges = data["edges"]
+                print "Received batch of size", len(edges), 'at', strftime("%Y%m%d%H%M%S", gmtime()),""
+                for x in edges:
+                    try:
+                        if only_strings:
+                            source = str(x["src"])
+                            destination = str(x["dest"])
+                        else:
+                            source = x["src"]
+                            destination = x["dest"]
+                        edge_type = x["type"] if 'type' in x else 0
+                        timestamp = int(x["time"]) if 'time' in x else 0
+                        s.add_delete(source, destination, edge_type)
+                    except Exception as e:
+                        print(traceback.format_exc())
+                        pass
+
+                # send immediately if the batch is now large
+                current_batch_size = s.insertions_count + s.deletions_count + s.vertex_updates_count
+                if current_batch_size > BATCH_THRESHOLD and BATCH_THRESHOLD > 0 or send_immediate:
+                    s.send_batch()
+                    print "Sending  batch of size", current_batch_size, 'at', strftime("%Y%m%d%H%M%S", gmtime()),""
+
+        except:
+            print(traceback.format_exc())
+            r = json.dumps({"error": "Unable to parse object"})
+            return Response(response=r,status=400,mimetype="application/json")
+
+        # end critical section
+        finally:
+            counter_lock.release()
+        exec_time = time.time() - exec_time
+        r = json.dumps({"status": "success", "time": exec_time, "current_batch_size": current_batch_size})
+        return Response(response=r,status=201,mimetype="application/json")
+
 @api.route('/vertex',endpoint='vertex')
 class VertexUpdate(Resource):
     vertexUpdate = api.model('VertexUpdate', {
